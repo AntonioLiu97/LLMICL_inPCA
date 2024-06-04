@@ -1,12 +1,12 @@
 continuous_series_names = [
-                           'brownian_motion', 
-                           'geometric_brownian_motion',
-                           'noisy_logistic_map',
-                           'logistic_map',
-                           'lorenz_system',
-                           'uncorrelated_gaussian',
-                           'correlated_gaussian',
-                           'uncorrelated_uniform'
+                           'uncorrelated_gaussian_centered_sigma_0.1',
+                           'uncorrelated_gaussian_centered_sigma_0.3',
+                           'uncorrelated_gaussian_centered_sigma_0.5',
+                           'uncorrelated_gaussian_centered_sigma_0.8',                           
+                           'uncorrelated_uniform_centered_sigma_0.1',
+                           'uncorrelated_uniform_centered_sigma_0.3',
+                           'uncorrelated_uniform_centered_sigma_0.5',
+                           'uncorrelated_uniform_centered_sigma_0.8',       
                            ]
 markov_chain_names = ['markov_chain']
 
@@ -62,8 +62,12 @@ def calculate_Markov(full_series, llama_size = '13b'):
 
     return logit_mat_good
 
-model, tokenizer = get_model_and_tokenizer('13b')
-def calculate_multiPDF(full_series, prec, mode = 'neighbor', refine_depth = 1, llama_size = '13b'):
+### clear CUDA memory
+torch.cuda.empty_cache()
+# model, tokenizer = get_model_and_tokenizer('13b')
+# model, tokenizer = get_model_and_tokenizer('7b')
+model, tokenizer = get_model_and_tokenizer('70b')
+def calculate_multiPDF(full_series, prec, mode = 'neighbor', refine_depth = 1, llama_size = '7b'):
     '''
      This function calculates the multi-resolution probability density function (PDF) for a given series.
 
@@ -77,8 +81,12 @@ def calculate_multiPDF(full_series, prec, mode = 'neighbor', refine_depth = 1, l
      Returns:
      list: A list of PDFs for the series.
     '''
-    if llama_size != '13b':
-        assert False, "Llama size must be '13b'"
+    # if llama_size != '13b':
+        # assert False, "Llama size must be '13b'"
+    # if llama_size != '7b':            
+    #     assert False, "Llama size must be '7b'"
+    if llama_size != '70b':            
+        assert False, "Llama size must be '70b'"        
     good_tokens_str = list("0123456789")
     good_tokens = [tokenizer.convert_tokens_to_ids(token) for token in good_tokens_str]
     assert refine_depth < prec, "Refine depth must be less than precision"
@@ -91,8 +99,8 @@ def calculate_multiPDF(full_series, prec, mode = 'neighbor', refine_depth = 1, l
     )
     torch.cuda.empty_cache()
     with torch.no_grad():
-        # out = model(batch['input_ids'].cuda(), use_cache=True)
-        out = model(batch['input_ids'].cpu(), use_cache=True)
+        out = model(batch['input_ids'].cuda(), use_cache=True)
+        # out = model(batch['input_ids'].cpu(), use_cache=True)
     logit_mat = out['logits']
     kv_cache_main = out['past_key_values']
     logit_mat_good = logit_mat[:,:,good_tokens].clone()
@@ -154,7 +162,8 @@ print(markov_chain_task.keys())
 
 for series_name, series_dict in sorted(continuous_series_task.items()):
     prec = series_dict['prec']
-    if prec != 20:
+    llama_size = series_dict['llama_size']
+    if prec == 2 and llama_size == '70b':
         print("Processing ", series_name)
         full_series = series_dict['full_series']
         prec = series_dict['prec']
@@ -166,17 +175,3 @@ for series_name, series_dict in sorted(continuous_series_task.items()):
         save_name = os.path.join(save_path, series_name)
         with open(save_name, 'wb') as f:
             pickle.dump(series_dict, f)
-        # Clear memory
-        del full_series, PDF_list, series_dict
-        gc.collect()
-        
-        
-for series_name, series_dict in sorted(markov_chain_task.items()):
-    print("Processing ", series_name)
-    full_series = series_dict['full_series']
-    llama_size = series_dict['llama_size']
-    logit_mat_good = calculate_Markov(full_series, llama_size = llama_size)    
-    series_dict['logit_mat_good'] = logit_mat_good
-    save_name = os.path.join(save_path, series_name)
-    with open(save_name, 'wb') as f:
-        pickle.dump(series_dict, f)
