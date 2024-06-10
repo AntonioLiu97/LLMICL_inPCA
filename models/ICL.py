@@ -157,16 +157,23 @@ class MultiResolutionPDF:
         mean (float): The mean of the PDF, computed in `compute_stats`.
         sigma (float): The standard deviation of the PDF, computed in `compute_stats`.
     """
-    def __init__(self):
+    def __init__(self, prec = None):
         """
         Constructor for the MultiResolutionPDF class.
 
         Initializes arrays for bin centers, widths, and heights. Statistical properties
         (mode, mean, sigma) are initialized to None.
         """
-        self.bin_center_arr = np.array([])
-        self.bin_width_arr = np.array([])
-        self.bin_height_arr = np.array([])
+        if prec == None:
+            self.bin_center_arr = np.array([])
+            self.bin_width_arr = np.array([])
+            self.bin_height_arr = np.array([])
+        else:
+            self.bin_width_arr = np.array([0.1**(prec-1)] * 10**prec)
+            self.bin_center_arr = np.linspace(0,10,10**prec,endpoint=False) + self.bin_width_arr/2
+            self.bin_height_arr = np.array([0.1] * 10**prec)
+            # self.check_gap_n_overlap()
+            # self.normalize(report=True)
         self.mode = None
         self.mean = None
         self.sigma = None
@@ -404,7 +411,7 @@ class MultiResolutionPDF:
         """
         Calculate the Bhattacharyya distance with another Multi_PDF object
         """          
-        assert np.all(self.bin_center_arr == Multi_PDF.bin_center_arr), "Only PDFs of the same discretization are comparable"
+        assert np.allclose(self.bin_center_arr, Multi_PDF.bin_center_arr), "Only PDFs of the same discretization are comparable"
         weighted_PQ_arr = np.sqrt(self.bin_height_arr * Multi_PDF.bin_height_arr) * self.bin_width_arr
         return -np.log(np.sum(weighted_PQ_arr))
     
@@ -412,7 +419,7 @@ class MultiResolutionPDF:
         """
         Calculate the Hellinger distance with another Multi_PDF object
         """          
-        assert np.all(self.bin_center_arr == Multi_PDF.bin_center_arr), "Only PDFs of the same discretization are comparable"
+        assert np.allclose(self.bin_center_arr, Multi_PDF.bin_center_arr), f"Only PDFs of the same discretization are comparable"
         weighted_PQ_arr = np.sqrt(self.bin_height_arr * Multi_PDF.bin_height_arr) * self.bin_width_arr
         return np.sqrt(2 - 2 * np.sum(weighted_PQ_arr))
     
@@ -421,10 +428,13 @@ class MultiResolutionPDF:
         Calculate the KL divergence D_KL(self||Multi_PDF)
         Prone to numerical instabilities
         """          
-        assert np.all(self.bin_center_arr == Multi_PDF.bin_center_arr), "Only PDFs of the same discretization are comparable"
+        assert np.allclose(self.bin_center_arr, Multi_PDF.bin_center_arr), "Only PDFs of the same discretization are comparable"
         log_ratio = np.log(self.bin_height_arr) - np.log(Multi_PDF.bin_height_arr)
         weighted_log_ratio = log_ratio * self.bin_height_arr * self.bin_width_arr
         return np.sum(weighted_log_ratio)
+    
+    def L2_dist(self,Multi_PDF):
+        raise NotImplementedError("L2 distance calculation is not implemented yet.")
         
     def plot(self, ax=None, log_scale=False, statistic = True):
         """
