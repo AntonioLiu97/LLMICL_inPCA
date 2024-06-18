@@ -6,7 +6,9 @@ continuous_series_names = [
                            'uncorrelated_uniform_centered_sigma_0.1',
                            'uncorrelated_uniform_centered_sigma_0.3',
                            'uncorrelated_uniform_centered_sigma_0.5',
-                           'uncorrelated_uniform_centered_sigma_0.8',       
+                           'uncorrelated_uniform_centered_sigma_0.8', 
+                           'uncorrelated_random_PDF_l_0.1_70b',        
+                           'uncorrelated_random_PDF_l_0.4_70b',    
                            ]
 markov_chain_names = ['markov_chain']
 
@@ -144,7 +146,7 @@ markov_chain_task = {}
 # Loop through each file in the directory
 for file in generated_series_dir.iterdir():
     # Check if a series is already processed
-    if not (save_path / file.name).exists():\
+    if not (save_path / file.name).exists():
         # Extract the series name from the file name
         series_name = file.stem.rsplit('_', 1)[0]
         # If the series is a continuous series, load the data into the continuous_series_data dictionary

@@ -421,7 +421,14 @@ class MultiResolutionPDF:
         """          
         assert np.allclose(self.bin_center_arr, Multi_PDF.bin_center_arr), f"Only PDFs of the same discretization are comparable"
         weighted_PQ_arr = np.sqrt(self.bin_height_arr * Multi_PDF.bin_height_arr) * self.bin_width_arr
-        return np.sqrt(2 - 2 * np.sum(weighted_PQ_arr))
+        sum_weighted_PQ = np.sum(weighted_PQ_arr)
+        clamped_value = np.clip(2 - 2 * sum_weighted_PQ, 0, None)
+        sqrt_value = np.sqrt(clamped_value)
+        
+        if np.isnan(sqrt_value) or np.isinf(sqrt_value):
+            print(f"Invalid sqrt value: {sqrt_value}, clamped_value: {clamped_value}, sum_weighted_PQ: {sum_weighted_PQ}")
+        
+        return sqrt_value
     
     def KL_div(self, Multi_PDF):
         """
