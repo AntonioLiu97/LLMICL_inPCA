@@ -17,6 +17,10 @@ markov_chain_names = ['markov_chain']
 import gc
 import sys
 import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2"  
+
+
 from pathlib import Path
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(parent_dir)

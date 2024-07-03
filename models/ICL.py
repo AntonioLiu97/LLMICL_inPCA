@@ -441,8 +441,10 @@ class MultiResolutionPDF:
         return np.sum(weighted_log_ratio)
     
     def L2_dist(self,Multi_PDF):
-        raise NotImplementedError("L2 distance calculation is not implemented yet.")
-        
+        assert np.allclose(self.bin_center_arr, Multi_PDF.bin_center_arr), "Only PDFs of the same discretization are comparable"
+        L2_dist = np.sum((self.bin_height_arr - Multi_PDF.bin_height_arr) ** 2 * self.bin_width_arr)
+        return L2_dist
+    
     def plot(self, ax=None, log_scale=False, statistic = True):
         """
         Plots the PDF as a bar chart.
