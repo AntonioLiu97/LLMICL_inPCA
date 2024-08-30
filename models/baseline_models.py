@@ -8,6 +8,12 @@ import numpy as np
 from ICL import MultiResolutionPDF
 from sklearn.neighbors import KernelDensity
 
+def silverman_bandwidth(data):
+    n = len(data)
+    std = np.std(data, ddof=1)  # Use sample standard deviation
+    iqr = np.percentile(data, 75) - np.percentile(data, 25)
+    return 1.06 * min(std, iqr/1.34) * n**(-1/5)
+
 def histogram_for_series(time_series, prec = 2):
     PDF_list = [histogram(None,prec)]
     for i in range(1, len(time_series)):
@@ -36,31 +42,87 @@ def histogram(points = None, prec = 2):
     return estimated_PDF
         
 
-def KDE_for_series(time_series, kernel = 'gaussian', prec = 2):
+def KDE_for_series(time_series, kernel = 'gaussian', prec = 2, bw_list = None):
     PDF_list = [KDE(None,kernel,prec)]
     for i in range(1, len(time_series)):
         points = time_series[:i]
-        estimated_PDF = KDE(points,kernel,prec)
+        n = len(points)
+        bw = None
+        if bw_list is not None:
+            bw = bw_list[n]            
+        estimated_PDF = KDE(points,kernel,prec,bw)
         PDF_list += [estimated_PDF]
     return PDF_list
 
-def KDE(points=None, kernel = 'gaussian', prec = 2):
+# def KDE(points=None, kernel = 'gaussian', prec = 2, bw = None):
+#     estimated_PDF = MultiResolutionPDF(prec)
+#     if points is None:
+#         return estimated_PDF
+#     if isinstance(kernel, str):
+#         n = len(points)
+#         if bw is None:
+#             kde = KernelDensity(kernel=kernel, 
+#                             bandwidth="silverman"
+#                             )
+#         else:            
+#             kde = KernelDensity(kernel=kernel, 
+#                             bandwidth=bw
+#                             )            
+            
+#         kde.fit(points.reshape(-1, 1))
+#         def PDF(x_array):
+#             log_density = kde.score_samples(x_array.reshape(-1, 1))
+#             return np.exp(log_density).flatten()
+#         estimated_PDF.discretize(PDF, mode = 'pdf')
+#     elif callable(kernel):
+#         raise NotImplementedError("Callable kernel is not implemented yet.")
+
+#     raise ValueError("Invalid kernel type. Must be a string or a callable function.")
+        
+        
+def KDE(points=None, kernel = 'gaussian', prec = 2, bw = None):
     estimated_PDF = MultiResolutionPDF(prec)
     if points is None:
         return estimated_PDF
-    else:
+    if isinstance(kernel, str):
         n = len(points)
-        bw = 1 / n ** (1/5)
-        kde = KernelDensity(kernel=kernel, 
+        if bw is None:
+            kde = KernelDensity(kernel=kernel, 
                             bandwidth="silverman"
-                            # bandwidth="scott"
-                            # bandwidth=bw
                             )
+        else:            
+            kde = KernelDensity(kernel=kernel, 
+                            bandwidth=bw
+                            )            
+            
         kde.fit(points.reshape(-1, 1))
         def PDF(x_array):
             log_density = kde.score_samples(x_array.reshape(-1, 1))
             return np.exp(log_density).flatten()
         estimated_PDF.discretize(PDF, mode = 'pdf')
-        return estimated_PDF
-    
+    # elif callable(kernel):
+    #     if bw is None:
+    #         bw = silverman_bandwidth(points)
         
+    #     def PDF(x_array):
+    #         result = np.zeros_like(x_array)
+    #         for point in points:
+    #             result += kernel((x_array - point) / bw)
+    #         return result / (len(points) * bw)
+        
+    #     estimated_PDF.discretize(PDF, mode='pdf')
+    elif callable(kernel):
+        if bw is None:
+            bw = silverman_bandwidth(points)
+        
+        def PDF(x_array):
+            # Vectorized computation
+            x_matrix = x_array[:, np.newaxis] - points
+            kernel_matrix = kernel(x_matrix / bw)
+            return np.sum(kernel_matrix, axis=1) / (len(points) * bw)
+        
+        estimated_PDF.discretize(PDF, mode='pdf')
+    else:
+        raise ValueError("Invalid kernel type. Must be a string or a callable function.")
+    
+    return estimated_PDF
