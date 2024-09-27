@@ -445,7 +445,7 @@ class MultiResolutionPDF:
         L2_dist = np.sum((self.bin_height_arr - Multi_PDF.bin_height_arr) ** 2 * self.bin_width_arr)
         return L2_dist
     
-    def plot(self, ax=None, log_scale=False, statistic = True):
+    def plot(self, ax=None, log_scale=False, statistic = True, uniform_color = None):
         """
         Plots the PDF as a bar chart.
 
@@ -462,20 +462,22 @@ class MultiResolutionPDF:
         
         # Iterate over bins and plot with corresponding color
         for center, width, height in zip(self.bin_center_arr, self.bin_width_arr, self.bin_height_arr):
-            color = closest_color(width, colors)
+            if uniform_color is not None:
+                color = uniform_color
+            else:
+                color = closest_color(width, colors)
             ax.bar(center, height, width=width, align='center', color=color, alpha=1)
         
-        
+
+        if log_scale:
+            ax.set_yscale('log')
+
         if statistic:
             ax.vlines(self.mean, 0, np.max(self.bin_height_arr), color='blue', label='Mean', lw=2)
             ax.vlines(self.mode, 0, np.max(self.bin_height_arr), color='lightblue', label='Mode', lw=2)
             # Visualize sigma as horizontal lines
             ax.hlines(y=np.max(self.bin_height_arr), xmin=self.mean - self.sigma, xmax=self.mean + self.sigma, color='g', label='Sigma', lw=2)
-
-        if log_scale:
-            ax.set_yscale('log')
-
-        ax.legend()
+            ax.legend()
 
         # If ax was None, show the plot
         if ax is None:
