@@ -1,11 +1,11 @@
 continuous_series_names = [
-                            'uncorrelated_random_PDF_l_0.02_13b',  
-                            'uncorrelated_random_PDF_l_0.05_13b', 
-                            'uncorrelated_random_PDF_l_0.1_13b',   
-                            'uncorrelated_random_PDF_l_0.2_13b',   
-                            'uncorrelated_random_PDF_l_0.3_13b',  
-                            'uncorrelated_random_PDF_l_0.4_13b',  
-                            'uncorrelated_random_PDF_l_0.5_13b',  
+                             'uncorrelated_random_PDF_l_0.1_70b', 
+                           'uncorrelated_random_PDF_l_0.2_70b',       
+                           'uncorrelated_random_PDF_l_0.3_70b',
+                           'uncorrelated_random_PDF_l_0.4_70b',     
+                           'uncorrelated_random_PDF_l_0.5_70b',  
+                           'uncorrelated_random_PDF_l_0.05_70b',  
+                           'uncorrelated_random_PDF_l_0.02_70b',     
                            ]
 markov_chain_names = ['markov_chain']
 
@@ -16,12 +16,11 @@ import sys
 import os
 
 import torch
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2"  
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"  
 
 # Limit the number of CPU cores
 os.environ["OMP_NUM_THREADS"] = "16"  # OpenMP
 os.environ["NUMEXPR_NUM_THREADS"] = "16"  # NumExpr
-
 # Set the number of threads for PyTorch
 torch.set_num_threads(16)
 print("PyTorch threads:", torch.get_num_threads())
@@ -74,9 +73,9 @@ def calculate_Markov(full_series, llama_size = '13b'):
 
 ### clear CUDA memory
 torch.cuda.empty_cache()
-model, tokenizer = get_model_and_tokenizer('13b')
+# model, tokenizer = get_model_and_tokenizer('13b')
 # model, tokenizer = get_model_and_tokenizer('7b')
-# model, tokenizer = get_model_and_tokenizer('70b')
+model, tokenizer = get_model_and_tokenizer('70b')
 def calculate_multiPDF(full_series, prec, mode = 'neighbor', refine_depth = 1, llama_size = '7b'):
     '''
      This function calculates the multi-resolution probability density function (PDF) for a given series.
@@ -91,12 +90,12 @@ def calculate_multiPDF(full_series, prec, mode = 'neighbor', refine_depth = 1, l
      Returns:
      list: A list of PDFs for the series.
     '''
-    if llama_size != '13b':
-        assert False, "Llama size must be '13b'"
+    # if llama_size != '13b':
+    #     assert False, "Llama size must be '13b'"
     # if llama_size != '7b':            
     #     assert False, "Llama size must be '7b'"
-    # if llama_size != '70b':            
-    #     assert False, "Llama size must be '70b'"        
+    if llama_size != '70b':            
+        assert False, "Llama size must be '70b'"        
     good_tokens_str = list("0123456789")
     good_tokens = [tokenizer.convert_tokens_to_ids(token) for token in good_tokens_str]
     assert refine_depth < prec, "Refine depth must be less than precision"
@@ -172,8 +171,8 @@ print(markov_chain_task.keys())
 
 for series_name, series_dict in sorted(continuous_series_task.items()):
     llama_size = series_dict['llama_size']
-    # if llama_size == '70b':
-    if llama_size == '13b':
+    if llama_size == '70b':
+    # if llama_size == '13b':
         print("Processing ", series_name)
         full_series = series_dict['full_series']
         prec = series_dict['prec']

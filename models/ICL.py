@@ -445,7 +445,7 @@ class MultiResolutionPDF:
         L2_dist = np.sum((self.bin_height_arr - Multi_PDF.bin_height_arr) ** 2 * self.bin_width_arr)
         return L2_dist
     
-    def plot(self, ax=None, log_scale=False, statistic = True, uniform_color = None):
+    def plot(self, ax=None, log_scale=False, statistic = True, uniform_color = None, alpha=1):
         """
         Plots the PDF as a bar chart.
 
@@ -466,7 +466,7 @@ class MultiResolutionPDF:
                 color = uniform_color
             else:
                 color = closest_color(width, colors)
-            ax.bar(center, height, width=width, align='center', color=color, alpha=1)
+            ax.bar(center, height, width=width, align='center', color=color, alpha=alpha)
         
 
         if log_scale:

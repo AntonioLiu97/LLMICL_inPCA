@@ -42,43 +42,49 @@ def histogram(points = None, prec = 2):
     return estimated_PDF
         
 
+# def KDE_for_series(time_series, kernel = 'gaussian', prec = 2, bw_list = None):
+#     PDF_list = [KDE(None,kernel,prec)]
+#     for i in range(1, len(time_series)):
+#         points = time_series[:i]
+#         n = len(points)
+#         bw = None
+#         if bw_list is not None:
+#             bw = bw_list[n]            
+#         estimated_PDF = KDE(points,kernel,prec,bw)
+#         PDF_list += [estimated_PDF]
+#     return PDF_list
+
+# Calculate Silverman's rule bandwidths
+def real_silverman_bandwidth(data):
+    n = len(data)
+    std = np.std(data, ddof=1)  # Use sample standard deviation
+    iqr = np.percentile(data, 75) - np.percentile(data, 25)
+    bw = 1.06 * min(std, iqr/1.34) * n**(-1/5)
+    if not np.isnan(bw):
+        return bw
+    else:
+        return 1.06 * n**(-1/5)
+
+
 def KDE_for_series(time_series, kernel = 'gaussian', prec = 2, bw_list = None):
+    """
+    Force default to real Silverman bandwidth
+    """
     PDF_list = [KDE(None,kernel,prec)]
     for i in range(1, len(time_series)):
         points = time_series[:i]
         n = len(points)
         bw = None
         if bw_list is not None:
-            bw = bw_list[n]            
+            bw = bw_list[n]     
+        else:
+            bw = real_silverman_bandwidth(points)
         estimated_PDF = KDE(points,kernel,prec,bw)
         PDF_list += [estimated_PDF]
     return PDF_list
 
-# def KDE(points=None, kernel = 'gaussian', prec = 2, bw = None):
-#     estimated_PDF = MultiResolutionPDF(prec)
-#     if points is None:
-#         return estimated_PDF
-#     if isinstance(kernel, str):
-#         n = len(points)
-#         if bw is None:
-#             kde = KernelDensity(kernel=kernel, 
-#                             bandwidth="silverman"
-#                             )
-#         else:            
-#             kde = KernelDensity(kernel=kernel, 
-#                             bandwidth=bw
-#                             )            
-            
-#         kde.fit(points.reshape(-1, 1))
-#         def PDF(x_array):
-#             log_density = kde.score_samples(x_array.reshape(-1, 1))
-#             return np.exp(log_density).flatten()
-#         estimated_PDF.discretize(PDF, mode = 'pdf')
-#     elif callable(kernel):
-#         raise NotImplementedError("Callable kernel is not implemented yet.")
 
-#     raise ValueError("Invalid kernel type. Must be a string or a callable function.")
-        
+
         
 def KDE(points=None, kernel = 'gaussian', prec = 2, bw = None):
     estimated_PDF = MultiResolutionPDF(prec)
