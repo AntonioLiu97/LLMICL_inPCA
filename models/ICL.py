@@ -413,7 +413,7 @@ class MultiResolutionPDF:
         """          
         assert np.allclose(self.bin_center_arr, Multi_PDF.bin_center_arr), "Only PDFs of the same discretization are comparable"
         weighted_PQ_arr = np.sqrt(self.bin_height_arr * Multi_PDF.bin_height_arr) * self.bin_width_arr
-        return -np.log(np.sum(weighted_PQ_arr))
+        return np.sqrt(-np.log(np.sum(weighted_PQ_arr)))
     
     def Hel_dist(self, Multi_PDF):
         """
@@ -436,9 +436,20 @@ class MultiResolutionPDF:
         Prone to numerical instabilities
         """          
         assert np.allclose(self.bin_center_arr, Multi_PDF.bin_center_arr), "Only PDFs of the same discretization are comparable"
-        log_ratio = np.log(self.bin_height_arr) - np.log(Multi_PDF.bin_height_arr)
+        # log_ratio = np.log(self.bin_height_arr) - np.log(Multi_PDF.bin_height_arr)
+        log_ratio = np.log(self.bin_height_arr + 1e-10) - np.log(Multi_PDF.bin_height_arr + 1e-10) 
         weighted_log_ratio = log_ratio * self.bin_height_arr * self.bin_width_arr
         return np.sum(weighted_log_ratio)
+    
+    def sKL(self, Multi_PDF):
+        """
+        Calculate the symmetrized KL divergence 
+        Prone to numerical instabilities
+        """          
+        assert np.allclose(self.bin_center_arr, Multi_PDF.bin_center_arr), "Only PDFs of the same discretization are comparable"
+        log_ratio = np.log(self.bin_height_arr + 1e-10) - np.log(Multi_PDF.bin_height_arr + 1e-10)       
+        weighted_log_ratio = log_ratio * (self.bin_height_arr * self.bin_width_arr - Multi_PDF.bin_height_arr * Multi_PDF.bin_width_arr)
+        return np.sqrt(np.sum(weighted_log_ratio))    
     
     def L2_dist(self,Multi_PDF):
         assert np.allclose(self.bin_center_arr, Multi_PDF.bin_center_arr), "Only PDFs of the same discretization are comparable"
