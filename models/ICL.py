@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-# colors = {1: 'dodgerblue', 0.1: 'violet', 0.01: 'hotpink'}
+
 colors = {1: 'lightseagreen', 0.1: 'dodgerblue', 0.01: 'blue'}
-# colors = {1: 'dodgerblue', 0.1: 'dodgerblue', 0.01: 'dodgerblue'}
+
 def closest_color(width, colors):
     return colors[min(colors.keys(), key=lambda k: abs(k-width))]
 

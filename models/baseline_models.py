@@ -14,16 +14,16 @@ def silverman_bandwidth(data):
     iqr = np.percentile(data, 75) - np.percentile(data, 25)
     return 1.06 * min(std, iqr/1.34) * n**(-1/5)
 
-def histogram_for_series(time_series, prec = 2):
+def histogram_for_series(time_series, prec = 2, alpha = 0.7):
     PDF_list = [histogram(None,prec)]
     for i in range(1, len(time_series)):
         points = time_series[:i]
-        estimated_PDF = histogram(points,prec)
+        estimated_PDF = histogram(points,prec, alpha)
         PDF_list += [estimated_PDF]
     return PDF_list
 
 
-def histogram(points = None, prec = 2):
+def histogram(points = None, prec = 2, alpha = 0.7):
     estimated_PDF = MultiResolutionPDF(prec)
     if points is None:
         return estimated_PDF
@@ -31,7 +31,7 @@ def histogram(points = None, prec = 2):
     bins = np.linspace(0, 10, 10**prec + 1)
 
     # Calculate histogram
-    uniform_bias = 0.7
+    uniform_bias = alpha
     counts, _ = np.histogram(points, bins=bins)
     counts = counts.astype(np.float64) + uniform_bias
 
