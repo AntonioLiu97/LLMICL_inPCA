@@ -1,0 +1,33 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: ICL_inPCA
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Toni J.B.
+    family-names: Liu
+    email: jl3499@cornell.edu
+    affiliation: 'Cornell University '
+    orcid: 'https://orcid.org/0009-0001-3142-5402'
+identifiers:
+  - type: url
+    value: 'https://arxiv.org/abs/2410.05218'
+    description: ArXiv URL
+repository-code: 'https://github.com/AntonioLiu97/LLMICL_inPCA'
+url: 'https://github.com/AntonioLiu97/LLMICL_inPCA'
+abstract: >-
+  This is the codebase for the paper "Density estimation
+  with LLMs: a geometric investigation of in-context
+  learning trajectories"
+keywords:
+  - >-
+    density estimation, DE, KDE, LLM, in-context learning,
+    kernel methods, PCA, InPCA, multidimensional scaling
+license: MIT
+commit: Initial release
+version: 1.0.0
+date-released: '2025-02-14'
