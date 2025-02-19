@@ -6,10 +6,12 @@ This repository contains the complementary codebase for the paper:
 *LLaMA-2 70B estimating a randomly generated, multi-modal distribution from 400 data points*
 
 
-<div style="position: relative;">
+<!-- <div style="position: relative;">
   <img src="figures/LLM_InPCA.gif" style="width: 100%; height: 350px; object-fit: cover; object-position: center;">
   <img src="figures/LLM_InPCA_legend.png" style="position: absolute; bottom: 0; left: 0; width: 25%; max-width: 130px; background-color: rgba(255, 255, 255, 0.7); padding: 5px;">
-</div>
+</div> -->
+
+![gaussian_0.1_llama_70b_KDE_hist](./figures/gaussian_0.1_llama_70b_KDE_hist.gif)
 
 *In-context density-estimation trajectories traversed by LLaMA-2 70B, Bayesian histogram, and kernel density estimator*
 
